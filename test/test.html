@@ -1,0 +1,111 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8">
+<title>JSMidi test suite</title>
+
+<script type="text/javascript" src="http://yui.yahooapis.com/3.2.0/build/yui/yui-min.js"></script>
+<script type="text/javascript" src="../midi.js"></script>
+
+</head>
+
+<body class="yui3-skin-sam  yui-skin-sam">
+<div id="testLogger"></div>
+
+<script type="text/javascript">
+YUI().use("console", "test",function (Y) {
+
+    var Assert = Y.Assert;
+    Y.namespace("jsmidi.test");
+
+    Y.jsmidi.test.EventTestCase = new Y.Test.Case({
+
+        name : "Midi events testcase",
+
+        setUp : function () {
+            this.data = {
+                name: "test",
+                year: 2007,
+                beta: true
+            };
+        },
+
+        tearDown : function () {
+            delete this.data;
+        },
+
+        testCreateEmpty : function () {
+            var event = new MidiEvent();
+
+            Assert.isObject(event);
+            Assert.isInstanceOf(MidiEvent, event);
+            Assert.isArray(event.timeStamp);
+            Assert.areEqual(0, event.timeStamp.length);
+        },
+
+        testCreateWithParams : function () {
+            var event = new MidiEvent({
+                    type:    MidiEvent.EVT_NOTE_ON,
+                    channel: 0,
+                    param1:  10,
+                    param2:  10
+                });
+
+            Assert.isObject(event);
+            Assert.isInstanceOf(MidiEvent, event);
+        },
+    });
+
+    Y.jsmidi.test.TrackTestCase = new Y.Test.Case({
+
+        name : "Midi track testcase",
+
+        setUp : function () {
+            this.evt1 = new MidiEvent({
+                    type:    MidiEvent.EVT_NOTE_ON,
+                    channel: 0,
+                    param1:  10,
+                    param2:  10
+                });
+        },
+
+        tearDown : function () {
+            delete this.evt1;
+        },
+
+        testCreateEmpty : function () {
+            var track = new MidiTrack();
+
+            Assert.isObject(track);
+            Assert.isInstanceOf(MidiTrack, track);
+            Assert.isArray(track.eventList);
+            Assert.areEqual(0, track.eventList.length);
+        },
+
+        testAddEvent : function () {
+            var track = new MidiTrack();
+
+            track.addEvent(this.evt1);
+
+            Assert.areEqual(1, track.eventList.length);
+        },
+    });
+
+    Y.jsmidi.test.Suite = new Y.Test.Suite("JSMidi Suite");
+    Y.jsmidi.test.Suite.add(Y.jsmidi.test.EventTestCase);
+    Y.jsmidi.test.Suite.add(Y.jsmidi.test.TrackTestCase);
+
+    var r = new Y.Console({
+        newestOnTop : false,
+        style: 'block'
+    });
+
+    r.render('#testLogger');
+
+    Y.Test.Runner.add(Y.jsmidi.test.Suite);
+    Y.Test.Runner.run();
+});
+</script>
+
+</body>
+</html>
