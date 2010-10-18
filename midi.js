@@ -81,4 +81,20 @@ MidiEvent.prototype = {
 
 }
 
+
+var MidiTrack = function() {
+    this.eventList = [];
 }
+
+MidiTrack.prototype = {
+    header: MIDI.TRACK_START,
+    closed: false,
+
+    addEvent: function(event) {
+        this.eventList.push(event);
+    },
+    addEvents: function(events) {
+        this.addEvent.apply(this, events);
+    }
+}
+
