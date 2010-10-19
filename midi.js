@@ -1,4 +1,21 @@
 var MIDI = new function() {}
+Midi.translateTickTime = function(value) {
+    var buffer = value & 0x7F;
+
+    while (value >>= 7) {
+        buffer <<= 8;
+        buffer |= ((value & 0x7F) | 0x80);
+    }
+
+    var blist = [];
+    while (true) {
+        blist.push(buffer & 0xff)
+
+        if (buffer & 0x80) buffer >>= 8;
+        else break;
+    }
+    return blist;
+}
 
 MIDI.HDR_CHUNKID     = "\x4D\x54\x68\x64"; // First 4 bytes of a SMF Midi file
 MIDI.prototype = { }
