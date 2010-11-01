@@ -85,8 +85,19 @@ MidiEvent.createNote = function(note, sustained) {
 };
 
 MidiEvent.prototype = {
-    setTimeStamp: function(ts) {
-        this.bytes[0] = ts & 0xff;
+    setTime: function(ticks) {
+        // if the last byte is 0, a new 0 is inserted after it since
+        // we need to have 2 nibbles for every time unit (eg. 81 00 -> 129
+        // ticks).
+
+        // The 0x00 byte is always the last one. This is how Midi
+        // interpreters know that the time measure specification ends and the
+        // rest of the event signature starts.
+
+        this.time = Midi.translateTickTime(ticks);
+        if (this.time[this.time.length-1] === 0) {
+            this.time.push(0);
+        }
     },
     setType: function(type) {
         if (type < MidiEvent.EVT_NOTE_OFF || type > MidiEvent.EVT_PITCH_BEND)
