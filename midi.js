@@ -34,54 +34,87 @@ var noteTable = { "G9": 0x7F, "Gb9": 0x7E, "F9": 0x7D, "E9": 0x7C, "Eb9": 0x7B,
 "C1": 0x18, "B0": 0x17, "Bb0": 0x16, "A0": 0x15, "Ab0": 0x14, "G0": 0x13, "Gb0": 0x12,
 "F0": 0x11, "E0": 0x10, "Eb0": 0x0F, "D0": 0x0E, "Db0": 0x0D, "C0": 0x0C };
 
-    while (value >>= 7) {
+
+var MidiWriter = function(cfgObj) {
+    this.header = HDR_CHUNKID + HDR_CHUNK_SIZE + HDR_TYPE0;
+    this.trackList = cfgObj && cfgObj.tracks ? cfgObj.tracks : [];
+};
+
+MidiWriter.stringToNumArray = function(str) {
+    return str.split("").map(function(char) {
+            return char.charCodeAt(0);
+        });
+};
+
+/*
+ * Converts an array of bytes to a string of hexadecimal characters. Prepares
+ * it to be converted into a base64 string.
+ *
+ * @param byteArray {Array} array of bytes that will be converted to a string
+ * @returns hexadecimal string
+ */
+MidiWriter.toHexString = function(byteArray) {
+    return byteArray.map(function(b) { return b.toString(16); }).join("");
+};
+
+/**
+ * Translates number of ticks to MIDI timestamp format, returning an array of
+ * bytes with the time values. Midi has a very particular time to express time,
+ * take a good look at the spec before ever touching this function.
+ *
+ * @param ticks {Integer} Number of ticks to be translated
+ * @returns Array of bytes that form the MIDI time value
+ */
+MidiWriter.translateTickTime = function(ticks) {
+    var buffer = ticks & 0x7F;
+
+    while (ticks = ticks >> 7) {
         buffer <<= 8;
-        buffer |= ((value & 0x7F) | 0x80);
+        buffer |= ((ticks & 0x7F) | 0x80);
     }
 
-    var blist = [];
+    var bList = [];
     while (true) {
-        blist.push(buffer & 0xff)
+        bList.push(buffer & 0xff);
 
-        if (buffer & 0x80) buffer >>= 8;
-        else break;
+        if (buffer & 0x80) { buffer >>= 8; }
+        else { break; }
     }
-    return blist;
-}
+    return bList;
+};
 
-MIDI.HDR_CHUNKID     = "\x4D\x54\x68\x64"; // First 4 bytes of a SMF Midi file
-MIDI.prototype = { }
-MIDI.HDR_CHUNK_SIZE  = "\x00\x00\x00\x06"; // Header size for SMF
-MIDI.HDR_TYPE0       = "\x00\x00"; // Midi Type 0 id
-MIDI.HDR_TYPE1       = "\x00\x01"; // Midi Type 1 id
+Midi.HDR_16TH    = "\x0020";
+Midi.HDR_EIGHT   = "\x0040";
+Midi.HDR_QUARTER = "\x0080";
+Midi.HDR_DOUBLE  = "\x0100";
+Midi.HDR_WHOLE   = "\x0200";
 
-MIDI.HDR_16TH        = "\x0020";
-MIDI.HDR_EIGHT       = "\x0040";
-MIDI.HDR_QUARTER     = "\x0080";
-MIDI.HDR_DOUBLE      = "\x0100";
-MIDI.HDR_WHOLE       = "\x0200";
+Midi.TRACK_START     = "MTrk"; // Marks the start of the track data
+Midi.TRACK_END       = "\x00\xFF\x2F\x00";
 
-MIDI.TRACK_START    = "\x4D\x54\x72\x6B"; // Marks the start of the track data
-MIDI.TRACK_END      = "\x00\xFF\x2F\x00";
+MidiWriter.prototype = {
+    addTrack: function(track) {
+        this.trackList.push(track);
+    },
+    toBytes: function() {
+
+    }
+};
 
 var MidiEvent = function(params) {
     this.timeStamp  = []; // Time stamp byte
 
     if (params) {
+        this.setTime(params.time || 0);
         this.setType(params.type);
         this.setChannel(params.channel);
         this.setParam1(params.param1);
         this.setParam2(params.param2);
     }
-}
+};
 
-MidiEvent.EVT_NOTE_OFF           = 0x8;
-MidiEvent.EVT_NOTE_ON            = 0x9;
-MidiEvent.EVT_AFTER_TOUCH        = 0xA;
-MidiEvent.EVT_CONTROLLER         = 0xB;
-MidiEvent.EVT_PROGRAM_CHANGE     = 0xC;
-MidiEvent.EVT_CHANNEL_AFTERTOUCH = 0xD;
-MidiEvent.EVT_PITCH_BEND         = 0xE;
+
+
 /**
  * Returns the list of events that form a note in MIDI. If the |sustained|
  * parameter is not specified, it creates the noteOff event, which stops the
@@ -132,14 +165,16 @@ MidiEvent.prototype = {
         }
     },
     setType: function(type) {
-        if (type < MidiEvent.EVT_NOTE_OFF || type > MidiEvent.EVT_PITCH_BEND)
+        if (type < EVT_NOTE_OFF || type > EVT_PITCH_BEND) {
             throw new Error("Trying to set an unknown event: " + type);
+        }
 
         this.type = type;
     },
     setChannel: function(channel) {
-        if (channel < 0 || channel > 15)
+        if (channel < 0 || channel > 15) {
             throw new Error("Channel is out of bounds.");
+        }
 
         this.channel = channel;
     },
@@ -160,22 +195,36 @@ MidiEvent.prototype = {
     }
 };
 
-}
+var MetaEvent = function(params) {
+    if (params) {
+        this.setType(params.type);
+        this.setChannel(params.channel);
+        this.setParam1(params.param1);
+        this.setParam2(params.param2);
+    }
+};
 
 
 var MidiTrack = function() {
-    this.eventList = [];
-}
+    this.events = {
+        meta: [],
+        midi: [],
+        sysex: []
+    }
+};
 
 MidiTrack.prototype = {
-    header: MIDI.TRACK_START,
+    header: Midi.TRACK_START,
     closed: false,
 
     addEvent: function(event) {
-        this.eventList.push(event);
+        //this.events.push(event);
     },
     addEvents: function(events) {
         this.addEvent.apply(this, events);
+    },
+    toBytes: function() {
+
     }
-}
+};
 
