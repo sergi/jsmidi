@@ -50,28 +50,39 @@ MidiEvent.EVT_CONTROLLER         = 0xB;
 MidiEvent.EVT_PROGRAM_CHANGE     = 0xC;
 MidiEvent.EVT_CHANNEL_AFTERTOUCH = 0xD;
 MidiEvent.EVT_PITCH_BEND         = 0xE;
+/**
+ * Returns the list of events that form a note in MIDI. If the |sustained|
+ * parameter is not specified, it creates the noteOff event, which stops the
+ * note after it has been played, instead of keeping it playing.
+ *
+ * @param note {Note} Note object
+ * @param sustained {Boolean} Whether the note has to end or keep playing
+ * @returns Array of events, with a maximum of two events (noteOn and noteOff)
+ */
 
 MidiEvent.createNote = function(note, sustained) {
     var events = [];
 
     events.push(new MidiEvent({
-        type:    MidiEvent.EVT_NOTE_ON,
-        channel: note.channel,
+        time:    this.setTime(time),
+        type:    EVT_NOTE_ON,
+        channel: note.channel || 0,
         param1:  note.pitch,
         param2:  note.volume
     }));
 
     if (!sustained) {
         events.push(new MidiEvent({
-            type:    MidiEvent.EVT_NOTE_OFF,
-            channel: note.channel,
+            time:    this.setTime(time),
+            type:    EVT_NOTE_OFF,
+            channel: note.channel || 0,
             param1:  note.pitch,
             param2:  note.volume
         }));
     }
 
     return events;
-}
+};
 
 MidiEvent.prototype = {
     setTimeStamp: function(ts) {
