@@ -117,6 +117,16 @@ MidiEvent.prototype = {
     setParam2: function(p) {
         this.param2 = p;
     },
+    toBytes: function() {
+        var byteArray = [];
+        byteArray.push.apply(byteArray, this.time);
+        byteArray.push(this.type,
+                       this.channel,
+                       this.param1,
+                       this.param2);
+        return byteArray;
+    }
+};
 
 }
 
