@@ -19,8 +19,8 @@ Since timings are not specified the defaults will be taken.
     // The |reduce| is used here simply to flatten the resulting array, since
     // |createNote| returns an array of events already.
     var events = ["C4", "E4", "G4"].map(MidiWriter.createNote)
-                                   .reduce(function(a, b) { return a.concat(b); });  
-       
+                                   .reduce(function(a, b) { return a.concat(b); });
+
     var track1 = MidiWriter.createTrack({ events: events });
     var song   = new MidiWriter({ tracks: [track1] });
 
