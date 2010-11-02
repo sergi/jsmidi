@@ -90,9 +90,6 @@ Midi.HDR_QUARTER = "\x0080";
 Midi.HDR_DOUBLE  = "\x0100";
 Midi.HDR_WHOLE   = "\x0200";
 
-Midi.TRACK_START     = "MTrk"; // Marks the start of the track data
-Midi.TRACK_END       = "\x00\xFF\x2F\x00";
-
 MidiWriter.prototype = {
     addTrack: function(track) {
         this.trackList.push(track);
@@ -214,8 +211,11 @@ var MidiTrack = window.MidiTrack = function(cfgObj) {
     }
 };
 
+//"MTrk" Marks the start of the track data
+MidiTrack.TRACK_START = [0x4, 0xd, 0x5, 0x4, 0x7, 0x2, 0x6, 0xb];
+MidiTrack.TRACK_END   = [0, 0, 0xF, 0xF, 0x2, 0xF, 0, 0];
+
 MidiTrack.prototype = {
-    header: Midi.TRACK_START,
     closed: false,
 
     addEvent: function(event) {
