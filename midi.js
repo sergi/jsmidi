@@ -42,9 +42,7 @@ var MidiWriter = window.MidiWriter = function(cfgObj) {
 };
 
 MidiWriter.stringToNumArray = function(str) {
-    return str.split("").map(function(char) {
-            return char.charCodeAt(0);
-        });
+    return str.split("").map(function(char) { return char.charCodeAt(0); });
 };
 
 /*
@@ -84,11 +82,13 @@ MidiWriter.translateTickTime = function(ticks) {
     return bList;
 };
 
+/*
 Midi.HDR_16TH    = "\x0020";
 Midi.HDR_EIGHT   = "\x0040";
 Midi.HDR_QUARTER = "\x0080";
 Midi.HDR_DOUBLE  = "\x0100";
 Midi.HDR_WHOLE   = "\x0200";
+*/
 
 MidiWriter.prototype = {
     addTrack: function(track) {
@@ -157,7 +157,7 @@ MidiEvent.prototype = {
         // interpreters know that the time measure specification ends and the
         // rest of the event signature starts.
 
-        this.time = Midi.translateTickTime(ticks);
+        this.time = MidiWriter.translateTickTime(ticks);
         if (this.time[this.time.length-1] === 0) {
             this.time.push(0);
         }
