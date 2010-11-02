@@ -209,6 +209,13 @@ var MidiTrack = window.MidiTrack = function(cfgObj) {
         midi: [],
         sysex: []
     }
+
+    if (cfgObj) {
+        var cEvents = cfgObj.events;
+        if (cEvents) {
+            for (var i=0, event; event = cEvents[i]; i++) { this.addEvent(event); }
+        }
+    }
 };
 
 //"MTrk" Marks the start of the track data
