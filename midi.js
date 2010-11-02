@@ -47,15 +47,18 @@ var noteTable = { "G9": 0x7F, "Gb9": 0x7E, "F9": 0x7D, "E9": 0x7C, "Eb9": 0x7B,
 "C1": 0x18, "B0": 0x17, "Bb0": 0x16, "A0": 0x15, "Ab0": 0x14, "G0": 0x13, "Gb0": 0x12,
 "F0": 0x11, "E0": 0x10, "Eb0": 0x0F, "D0": 0x0E, "Db0": 0x0D, "C0": 0x0C };
 
+// Helper functions
 
-var MidiWriter = window.MidiWriter = function(cfgObj) {
-    this.header = HDR_CHUNKID + HDR_CHUNK_SIZE + HDR_TYPE0;
-    this.trackList = cfgObj && cfgObj.tracks ? cfgObj.tracks : [];
-};
-
-MidiWriter.stringToNumArray = function(str) {
-    return str.split("").map(function(char) { return char.charCodeAt(0); });
-};
+/*
+ * Converts a string into an array of ASCII char codes for every character of
+ * the string.
+ *
+ * @param str {String} String to be converted
+ * @returns array with the charcode values of the string
+ */
+function StringToNumArray(str) {
+    return [].map.call(str, function(char) { return char.charCodeAt(0); });
+}
 
 /*
  * Converts an array of bytes to a string of hexadecimal characters. Prepares
@@ -64,9 +67,29 @@ MidiWriter.stringToNumArray = function(str) {
  * @param byteArray {Array} array of bytes that will be converted to a string
  * @returns hexadecimal string
  */
-MidiWriter.toHexString = function(byteArray) {
-    return byteArray.map(function(b) { return b.toString(16); }).join("");
-};
+function codes2Str(byteArray) {
+    return String.fromCharCode(null, byteArray);
+}
+
+/*
+ * Converts a String of hexadecimal values to an array of nibbles (4-bit
+ * values). It can also add remaining "0" nibbles in order to have enough bytes
+ * in the array as the |finalBytes| parameter.
+ *
+ * @param str {String} string of hexadecimal values e.g. "097B8A"
+ * @param finalBytes {Integer} Optional. The desired number of bytes (not nibbles) that the returned array should contain *
+ * @returns array of nibbles.
+ */
+
+function str2Bytes(str, finalBytes) {
+    if (finalBytes) {
+        while ((str.length / 2) < finalBytes) { str = "0" + str; }
+    }
+
+    return Array.prototype.map.call(str, function(ch) {
+        return parseInt(ch, 16);
+    });
+}
 
 /**
  * Translates number of ticks to MIDI timestamp format, returning an array of
@@ -76,7 +99,7 @@ MidiWriter.toHexString = function(byteArray) {
  * @param ticks {Integer} Number of ticks to be translated
  * @returns Array of bytes that form the MIDI time value
  */
-MidiWriter.translateTickTime = function(ticks) {
+var translateTickTime = function(ticks) {
     var buffer = ticks & 0x7F;
 
     while (ticks = ticks >> 7) {
@@ -95,12 +118,6 @@ MidiWriter.translateTickTime = function(ticks) {
 };
 
 /*
-Midi.HDR_16TH    = "\x0020";
-Midi.HDR_EIGHT   = "\x0040";
-Midi.HDR_QUARTER = "\x0080";
-Midi.HDR_DOUBLE  = "\x0100";
-Midi.HDR_WHOLE   = "\x0200";
-*/
 
 MidiWriter.prototype = {
     addTrack: function(track) {
@@ -169,7 +186,7 @@ MidiEvent.prototype = {
         // interpreters know that the time measure specification ends and the
         // rest of the event signature starts.
 
-        this.time = MidiWriter.translateTickTime(ticks);
+        this.time = translateTickTime(ticks);
         if (this.time[this.time.length-1] === 0) {
             this.time.push(0);
         }
