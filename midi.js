@@ -29,7 +29,10 @@ var EVT_PROGRAM_CHANGE     = 0xC;
 var EVT_CHANNEL_AFTERTOUCH = 0xD;
 var EVT_PITCH_BEND         = 0xE;
 
-var noteTable = { "G9": 0x7F, "Gb9": 0x7E, "F9": 0x7D, "E9": 0x7C, "Eb9": 0x7B,
+// This is the conversion table from notes to its MIDI number. Provided for
+// convenience, it is not used in this code.
+var noteTable =
+    window.noteTable = { "G9": 0x7F, "Gb9": 0x7E, "F9": 0x7D, "E9": 0x7C, "Eb9": 0x7B,
 "D9": 0x7A, "Db9": 0x79, "C9": 0x78, "B8": 0x77, "Bb8": 0x76, "A8": 0x75, "Ab8": 0x74,
 "G8": 0x73, "Gb8": 0x72, "F8": 0x71, "E8": 0x70, "Eb8": 0x6F, "D8": 0x6E, "Db8": 0x6D,
 "C8": 0x6C, "B7": 0x6B, "Bb7": 0x6A, "A7": 0x69, "Ab7": 0x68, "G7": 0x67, "Gb7": 0x66,
@@ -118,13 +121,42 @@ var translateTickTime = function(ticks) {
 };
 
 /*
+ * This is the function that assembles the MIDI file. It writes the
+ * necessary constants for the MIDI header and goes through all the tracks, appending
+ * their data to the final MIDI stream.
+ * It returns an object with the final values in hex and in base64, and with
+ * some useful methods to play an manipulate the resulting MIDI stream.
+ *
+ * @param config {Object} Configuration object. It contains the tracks, tempo
+ * and other values necessary to generate the MIDI stream.
+ *
+ * @returns An object with the hex and base64 resulting streams, as well as
+ * with some useful methods.
+ */
+var MidiWriter = window.MidiWriter = function(config) {
+    if (config) {
+        var tracks  = config.tracks || [];
+        // Number of tracks in hexadecimal
+        var tracksLength = tracks.length.toString(16);
 
-MidiWriter.prototype = {
-    addTrack: function(track) {
-        this.trackList.push(track);
-    },
-    toBytes: function() {
+        // This variable will hold the whole midi stream and we will add every
+        // chunk of MIDI data to it in the next lines.
+        var hexMidi = HDR_CHUNKID + HDR_CHUNK_SIZE + HDR_TYPE0;
 
+        // Appends the number of tracks expressed in 2 bytes, as the MIDI
+        // standard requires.
+        hexMidi += codes2Str(str2Bytes(tracksLength, 2));
+        hexMidi += HDR_SPEED;
+        // Goes through the tracks appending the hex strings that compose them.
+        tracks.forEach(function(trk) { hexMidi += codes2Str(trk.toBytes()); });
+
+        return {
+            hex: hexMidi,
+            b64: btoa(hexMidi)
+        };
+
+    } else {
+        throw new Error("No parameters have been passed to MidiWriter.");
     }
 };
 
@@ -139,7 +171,6 @@ var MidiEvent = window.MidiEvent = function(params) {
         this.setParam2(params.param2);
     }
 };
-
 
 
 /**
