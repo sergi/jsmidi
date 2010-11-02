@@ -219,13 +219,29 @@ MidiTrack.prototype = {
     closed: false,
 
     addEvent: function(event) {
-        //this.events.push(event);
-    },
-    addEvents: function(events) {
-        this.addEvent.apply(this, events);
+        var type = "midi";
+
+        if (event instanceof MetaEvent) { type = "meta"; }
+
+        this.events[type].push(event);
+
+        return this;
     },
     toBytes: function() {
+        var trackBytes = MidiTrack.TRACK_START;
+        var metaEvents = this.events.meta;
+        var midiEvents = this.events.midi;
 
+        var addEventBytes = function(event) {
+            trackBytes.push.apply(trackBytes, event.toBytes());
+        }
+
+        metaEvents.forEach(addEventBytes);
+        midiEvents.forEach(addEventBytes);
+
+        trackBytes.push.apply(trackBytes, MidiTrack.TRACK_END);
+
+        return trackBytes;
     }
 };
 
