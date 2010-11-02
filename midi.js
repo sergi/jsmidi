@@ -1,6 +1,18 @@
 /*jslint es5: true, laxbreak: true */
 
 (function (window) {
+
+// Create a mock console object to void undefined errors if the console object
+// is not defined.
+if (!window.console || !console.firebug) {
+    var names = ["log", "debug", "info", "warn", "error"];
+
+    window.console = {};
+    for (var i = 0; i < names.length; ++i) {
+        window.console[names[i]] = function() {};
+    }
+}
+
 // 0x4D 0x54 0x68 0x64 First 4 bytes of a SMF Midi file
 var HDR_CHUNKID     = "MThd";
 var HDR_CHUNK_SIZE  = "\x00\x00\x00\x06"; // Header size for SMF
