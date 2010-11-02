@@ -177,6 +177,9 @@ MidiEvent.createNote = function(note, sustained) {
 };
 
 MidiEvent.prototype = {
+    type: 0,
+    channel: 0,
+    time: 0,
     setTime: function(ticks) {
         // if the last byte is 0, a new 0 is inserted after it since
         // we need to have 2 nibbles for every time unit (eg. 81 00 -> 129
@@ -213,11 +216,17 @@ MidiEvent.prototype = {
     },
     toBytes: function() {
         var byteArray = [];
+        var typeChannelByte =
+            parseInt(this.type.toString(16) + this.channel.toString(16), 16);
+
         byteArray.push.apply(byteArray, this.time);
-        byteArray.push(this.type,
-                       this.channel,
-                       this.param1,
-                       this.param2);
+        byteArray.push(typeChannelByte);
+        byteArray.push.apply(byteArray, str2Bytes(this.param1.toString(16), 1));
+
+        // Some events don't have a second parameter
+        if (this.param2 !== undefined && this.param2 !== null) {
+            byteArray.push.apply(byteArray, str2Bytes(this.param2.toString(16), 1));
+        }
         return byteArray;
     }
 };
