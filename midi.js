@@ -232,18 +232,15 @@ var MetaEvent = window.MetaEvent = function(params) {
 };
 
 
-var MidiTrack = window.MidiTrack = function(cfgObj) {
+var MidiTrack = window.MidiTrack = function(events) {
     this.events = {
         meta: [],
         midi: [],
         sysex: []
-    }
+    };
 
-    if (cfgObj) {
-        var cEvents = cfgObj.events;
-        if (cEvents) {
-            for (var i=0, event; event = cEvents[i]; i++) { this.addEvent(event); }
-        }
+    if (events) {
+        for (var i=0, event; event = events[i]; i++) { this.addEvent(event); }
     }
 };
 
@@ -253,31 +250,33 @@ MidiTrack.TRACK_END   = [0, 0, 0xF, 0xF, 0x2, 0xF, 0, 0];
 
 MidiTrack.prototype = {
     closed: false,
-
     addEvent: function(event) {
         var type = "midi";
 
         if (event instanceof MetaEvent) { type = "meta"; }
-
         this.events[type].push(event);
 
         return this;
     },
     toBytes: function() {
-        var trackBytes = MidiTrack.TRACK_START;
+        var trackLength = 0;
+        var eventBytes = [];
         var metaEvents = this.events.meta;
         var midiEvents = this.events.midi;
 
         var addEventBytes = function(event) {
-            trackBytes.push.apply(trackBytes, event.toBytes());
-        }
+            var bytes = event.toBytes();
+            Array.prototype.push.apply(eventBytes, bytes);
+            trackLength += bytes.length;
+        };
 
         metaEvents.forEach(addEventBytes);
         midiEvents.forEach(addEventBytes);
 
-        trackBytes.push.apply(trackBytes, MidiTrack.TRACK_END);
-
-        return trackBytes;
+        return MidiTrack.TRACK_START.concat(
+                   str2Bytes(trackLength.toString(16), 4),
+                   eventBytes,
+                   MidiTrack.TRACK_END);
     }
 };
 
