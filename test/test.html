@@ -38,7 +38,7 @@ YUI().use("console", "test",function (Y) {
         name: "Midi Class testcase",
 
         testTranslateTickTime: function() {
-            var ttt = Midi.translateTickTime;
+            var ttt = MidiWriter.translateTickTime;
 
             A.areEqual(127, ttt(127)[0]);
 
@@ -82,7 +82,7 @@ YUI().use("console", "test",function (Y) {
             A.areEqual(0, event.channel);
             A.areEqual(0x3c, event.param1);
             A.areEqual(28, event.param2);
-            A.areEqual("8100903c1c",Midi.toHexString(event.toBytes()));
+            A.areEqual("8100903c1c",MidiWriter.toHexString(event.toBytes()));
 
             var event2 = new MidiEvent({
                     time: 127,
@@ -91,12 +91,12 @@ YUI().use("console", "test",function (Y) {
                     param1: 0x3E,
                     param2: 0x60
                     })
-            A.areEqual("7f903e60", Midi.toHexString(event2.toBytes()));
+            A.areEqual("7f903e60", MidiWriter.toHexString(event2.toBytes()));
         },
 
 
     });
-/*
+
     Y.jsmidi.test.TrackTestCase = new Y.Test.Case({
 
         name : "Midi track testcase",
@@ -119,23 +119,18 @@ YUI().use("console", "test",function (Y) {
 
             A.isObject(track);
             A.isInstanceOf(MidiTrack, track);
-            A.isArray(track.eventList);
-            A.areEqual(0, track.eventList.length);
-        },
-
-        testAddEvent : function () {
-            var track = new MidiTrack();
-
-            track.addEvent(this.evt1);
-
-            A.areEqual(1, track.eventList.length);
+            A.isObject(track.events);
+            A.areEqual(0, track.events.midi.length);
+            A.areEqual(0, track.events.meta.length);
+            A.areEqual(0, track.events.sysex.length);
+            A.areEqual("4d54726b00ff2f00", MidiWriter.toHexString(track.toBytes()));
         },
     });
-*/
+
     Y.jsmidi.test.Suite = new Y.Test.Suite("JSMidi Suite");
     Y.jsmidi.test.Suite.add(Y.jsmidi.test.MidiTestCase);
     Y.jsmidi.test.Suite.add(Y.jsmidi.test.EventTestCase);
-    //Y.jsmidi.test.Suite.add(Y.jsmidi.test.TrackTestCase);
+    Y.jsmidi.test.Suite.add(Y.jsmidi.test.TrackTestCase);
 
     var r = new Y.Console({
         newestOnTop : false,
