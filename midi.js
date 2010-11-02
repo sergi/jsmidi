@@ -1,5 +1,6 @@
 /*jslint es5: true, laxbreak: true */
 
+(function (window) {
 // 0x4D 0x54 0x68 0x64 First 4 bytes of a SMF Midi file
 var HDR_CHUNKID     = "MThd";
 var HDR_CHUNK_SIZE  = "\x00\x00\x00\x06"; // Header size for SMF
@@ -35,7 +36,7 @@ var noteTable = { "G9": 0x7F, "Gb9": 0x7E, "F9": 0x7D, "E9": 0x7C, "Eb9": 0x7B,
 "F0": 0x11, "E0": 0x10, "Eb0": 0x0F, "D0": 0x0E, "Db0": 0x0D, "C0": 0x0C };
 
 
-var MidiWriter = function(cfgObj) {
+var MidiWriter = window.MidiWriter = function(cfgObj) {
     this.header = HDR_CHUNKID + HDR_CHUNK_SIZE + HDR_TYPE0;
     this.trackList = cfgObj && cfgObj.tracks ? cfgObj.tracks : [];
 };
@@ -101,7 +102,7 @@ MidiWriter.prototype = {
     }
 };
 
-var MidiEvent = function(params) {
+var MidiEvent = window.MidiEvent = function(params) {
     this.timeStamp  = []; // Time stamp byte
 
     if (params) {
@@ -195,7 +196,7 @@ MidiEvent.prototype = {
     }
 };
 
-var MetaEvent = function(params) {
+var MetaEvent = window.MetaEvent = function(params) {
     if (params) {
         this.setType(params.type);
         this.setChannel(params.channel);
@@ -205,7 +206,7 @@ var MetaEvent = function(params) {
 };
 
 
-var MidiTrack = function() {
+var MidiTrack = window.MidiTrack = function(cfgObj) {
     this.events = {
         meta: [],
         midi: [],
@@ -228,3 +229,4 @@ MidiTrack.prototype = {
     }
 };
 
+})(this);
