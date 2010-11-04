@@ -60,7 +60,9 @@ var noteTable =
  * @returns array with the charcode values of the string
  */
 function StringToNumArray(str) {
-    return [].map.call(str, function(char) { return char.charCodeAt(0); });
+    return Array.prototype.map.call(str, function(char) {
+        return char.charCodeAt(0);
+    });
 }
 
 /*
