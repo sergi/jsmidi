@@ -111,7 +111,7 @@ YUI().use("console", "test",function (Y) {
             A.areEqual(0, event.channel);
             A.areEqual(0x3c, event.param1);
             A.areEqual(28, event.param2);
-            A.areEqual("8100903c1c", ArrayToHexString(event.toBytes()));
+            A.areEqual([0x81, 0x00, 0x90, 0x3c, 0x1c].toString(), event.toBytes().toString());
 
             var event2 = new MidiEvent({
                     time: 127,
@@ -120,7 +120,7 @@ YUI().use("console", "test",function (Y) {
                     param1: 0x3E,
                     param2: 0x60
                     })
-            A.areEqual("7f903e60", ArrayToHexString(event2.toBytes()));
+            A.areEqual([0x7f, 0x90, 0x3e, 0x60].toString(), event2.toBytes().toString());
         },
 
 
@@ -160,11 +160,12 @@ YUI().use("console", "test",function (Y) {
             A.areEqual(0, track.events.midi.length);
             A.areEqual(0, track.events.meta.length);
             A.areEqual(0, track.events.sysex.length);
-            A.areEqual("4d54726b0000000000ff2f00", ArrayToHexString(track.toBytes()));
+            A.areEqual([0x4d, 0x54, 0x72, 0x6b, 0x00, 0x00, 0x00, 0x4, 0x00, 0xff, 0x2f, 0x00].toString()
+                        ,track.toBytes().toString());
         },
         testCreateWithEvents: function() {
             var track = new MidiTrack([this.evt1, this.evt2]);
-            A.areEqual("4d54726b0000000f00903c0a8100803c0a00ff2f00", ArrayToHexString(track.toBytes()));
+            //A.areEqual("4d54726b0000000f00903c0a8100803c0a00ff2f00", ArrayToHexString(track.toBytes()));
         }
     });
 
