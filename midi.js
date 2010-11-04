@@ -329,7 +329,7 @@ MidiTrack.prototype = {
 
         // Makes sure that track length will fill up 4 bytes with 0s in case
         // the length is less than that (the usual case).
-        var lengthBytes = str2Bytes(trackLength.toString(16), 4),
+        var lengthBytes = str2Bytes(trackLength.toString(16), 4);
 
         return startBytes.concat(lengthBytes, eventBytes, endBytes);
     }
