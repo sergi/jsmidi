@@ -217,18 +217,11 @@ MidiEvent.prototype = {
     channel: 0,
     time: 0,
     setTime: function(ticks) {
-        // if the last byte is 0, a new 0 is inserted after it since
-        // we need to have 2 nibbles for every time unit (eg. 81 00 -> 129
-        // ticks).
-
         // The 0x00 byte is always the last one. This is how Midi
         // interpreters know that the time measure specification ends and the
         // rest of the event signature starts.
 
         this.time = translateTickTime(ticks);
-        if (this.time[this.time.length-1] === 0) {
-            this.time.push(0);
-        }
     },
     setType: function(type) {
         if (type < EVT_NOTE_OFF || type > EVT_PITCH_BEND) {
