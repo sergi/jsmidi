@@ -155,8 +155,11 @@ var MidiWriter = window.MidiWriter = function(config) {
         return {
             b64: btoa(hexMidi),
             play: function() {
-                var audio = new Audio("data:audio/x-midi;base64," + this.b64);
+                var audio = new Audio("data:audio/mid;base64," + this.b64);
                 audio.play();
+            },
+            save: function() {
+                document.location.href = "data:audio/midi;base64," + this.b64;
             }
         };
 
