@@ -91,9 +91,13 @@ function str2Bytes(str, finalBytes) {
         while ((str.length / 2) < finalBytes) { str = "0" + str; }
     }
 
-    return Array.prototype.map.call(str, function(ch) {
-        return parseInt(ch, 16);
-    });
+    var bytes = [];
+    for (var i=str.length-1; i>=0; i = i-2) {
+        var chars = i === 0 ? str[i] : str[i-1] + str[i];
+        bytes.unshift(parseInt(chars, 16));
+    }
+
+    return bytes;
 }
 
 /**
