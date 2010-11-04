@@ -73,7 +73,7 @@ function StringToNumArray(str) {
  * @returns hexadecimal string
  */
 function codes2Str(byteArray) {
-    return String.fromCharCode(null, byteArray);
+    return String.fromCharCode.apply(null, byteArray);
 }
 
 /*
