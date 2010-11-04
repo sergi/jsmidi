@@ -252,16 +252,17 @@ MidiEvent.prototype = {
     },
     toBytes: function() {
         var byteArray = [];
+
         var typeChannelByte =
             parseInt(this.type.toString(16) + this.channel.toString(16), 16);
 
         byteArray.push.apply(byteArray, this.time);
         byteArray.push(typeChannelByte);
-        byteArray.push.apply(byteArray, str2Bytes(this.param1.toString(16), 1));
+        byteArray.push(this.param1);
 
         // Some events don't have a second parameter
         if (this.param2 !== undefined && this.param2 !== null) {
-            byteArray.push.apply(byteArray, str2Bytes(this.param2.toString(16), 1));
+            byteArray.push(this.param2);
         }
         return byteArray;
     }
