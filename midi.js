@@ -153,8 +153,11 @@ var MidiWriter = window.MidiWriter = function(config) {
         tracks.forEach(function(trk) { hexMidi += codes2Str(trk.toBytes()); });
 
         return {
-            hex: hexMidi,
-            b64: btoa(hexMidi)
+            b64: btoa(hexMidi),
+            play: function() {
+                var audio = new Audio("data:audio/x-midi;base64," + this.b64);
+                audio.play();
+            }
         };
 
     } else {
