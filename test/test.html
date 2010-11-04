@@ -32,44 +32,6 @@ YUI().use("console", "test",function (Y) {
     var EVT_CHANNEL_AFTERTOUCH = 0xD;
     var EVT_PITCH_BEND         = 0xE;
 
-
-    function StringToNumArray(str) {
-        return [].map.call(str, function(char) { return char.charCodeAt(0); });
-    }
-
-    function ArrayToHexString(byteArray) {
-        return byteArray.map(function(b) { return b.toString(16); }).join("");
-    }
-
-    function StringToByteArray(str, finalBytes) {
-        if (finalBytes) {
-            while ((str.length / 2) < finalBytes) { str = "0" + str; }
-        }
-
-        return Array.prototype.map.call(str, function(ch) {
-            return parseInt(ch, 16);
-        });
-    }
-
-    var translateTickTime = function(ticks) {
-        var buffer = ticks & 0x7F;
-
-        while (ticks = ticks >> 7) {
-            buffer <<= 8;
-            buffer |= ((ticks & 0x7F) | 0x80);
-        }
-
-        var bList = [];
-        while (true) {
-            bList.push(buffer & 0xff);
-
-            if (buffer & 0x80) { buffer >>= 8; }
-            else { break; }
-        }
-        return bList;
-    };
-
-
     Y.namespace("jsmidi.test");
 
     Y.jsmidi.test.MidiTestCase = new Y.Test.Case({
