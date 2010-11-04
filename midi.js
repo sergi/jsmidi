@@ -291,8 +291,8 @@ var MidiTrack = window.MidiTrack = function(events) {
 };
 
 //"MTrk" Marks the start of the track data
-MidiTrack.TRACK_START = [0x4, 0xd, 0x5, 0x4, 0x7, 0x2, 0x6, 0xb];
-MidiTrack.TRACK_END   = [0, 0, 0xF, 0xF, 0x2, 0xF, 0, 0];
+MidiTrack.TRACK_START = [0x4d, 0x54, 0x72, 0x6b];
+MidiTrack.TRACK_END   = [0x0, 0xFF, 0x2F, 0x0];
 
 MidiTrack.prototype = {
     closed: false,
@@ -309,11 +309,19 @@ MidiTrack.prototype = {
         var eventBytes = [];
         var metaEvents = this.events.meta;
         var midiEvents = this.events.midi;
+        var startBytes = MidiTrack.TRACK_START;
+        var endBytes   = MidiTrack.TRACK_END;
 
+        /*
+         * Adds the bytes of an event to the eventBytes array and add the
+         * amount of bytes to |trackLength|.
+         *
+         * @param event {MidiEvent} MIDI event we want the bytes from.
+         */
         var addEventBytes = function(event) {
             var bytes = event.toBytes();
-            Array.prototype.push.apply(eventBytes, bytes);
             trackLength += bytes.length;
+            Array.prototype.push.apply(eventBytes, bytes);
         };
 
         metaEvents.forEach(addEventBytes);
