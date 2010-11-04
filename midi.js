@@ -77,12 +77,12 @@ function codes2Str(byteArray) {
 }
 
 /*
- * Converts a String of hexadecimal values to an array of nibbles (4-bit
- * values). It can also add remaining "0" nibbles in order to have enough bytes
- * in the array as the |finalBytes| parameter.
+ * Converts a String of hexadecimal values to an array of bytes. It can also
+ * add remaining "0" nibbles in order to have enough bytes in the array as the
+ * |finalBytes| parameter.
  *
  * @param str {String} string of hexadecimal values e.g. "097B8A"
- * @param finalBytes {Integer} Optional. The desired number of bytes (not nibbles) that the returned array should contain *
+ * @param finalBytes {Integer} Optional. The desired number of bytes that the returned array should contain
  * @returns array of nibbles.
  */
 
