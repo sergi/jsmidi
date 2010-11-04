@@ -313,10 +313,15 @@ MidiTrack.prototype = {
         metaEvents.forEach(addEventBytes);
         midiEvents.forEach(addEventBytes);
 
-        return MidiTrack.TRACK_START.concat(
-                   str2Bytes(trackLength.toString(16), 4),
-                   eventBytes,
-                   MidiTrack.TRACK_END);
+        // Add the end-of-track bytes to the sum of bytes for the track, since
+        // they are counted (unlike the start-of-track ones).
+        trackLength += endBytes.length;
+
+        // Makes sure that track length will fill up 4 bytes with 0s in case
+        // the length is less than that (the usual case).
+        var lengthBytes = str2Bytes(trackLength.toString(16), 4),
+
+        return startBytes.concat(lengthBytes, eventBytes, endBytes);
     }
 };
 
