@@ -54,8 +54,7 @@ YUI().use("console", "test",function (Y) {
                     param2:  90
                 });
         },
-
-
+        /*
         testTranslateTickTime: function() {
             var ttt = translateTickTime;
 
@@ -70,16 +69,13 @@ YUI().use("console", "test",function (Y) {
             A.areEqual(0x80, ttt(v3)[1]);
             A.areEqual(0x00, ttt(v3)[2]);
 
-        },
+            },
+        */
         testMidiWriter: function() {
             var track = new MidiTrack([this.evt1, this.evt2]);
             var midiHex = MidiWriter({ tracks: [track] });
-
-            var uri = "data:audio/x-midi;base64," + midiHex.b64;
-            var audioEl = new Audio();
-            //console.log(midiHex)
-            audioEl.src = uri//"http://www.a1freesoundeffects.com/popular12008/sword.mp3";
-            audioEl.play();
+            //midiHex.save();
+            //a.src = uri//"http://www.a1freesoundeffects.com/popular12008/sword.mp3";
         }
     });
 
@@ -110,8 +106,8 @@ YUI().use("console", "test",function (Y) {
             A.areEqual(EVT_NOTE_ON, event.type);
             A.areEqual(0, event.channel);
             A.areEqual(0x3c, event.param1);
-            A.areEqual(28, event.param2);
-            A.areEqual([0x81, 0x00, 0x90, 0x3c, 0x1c].toString(), event.toBytes().toString());
+            A.areEqual(90, event.param2);
+            A.areEqual([0x81, 0x00, 0x90, 0x3c, 0x5a].toString(), event.toBytes().toString());
 
             var event2 = new MidiEvent({
                     time: 127,
@@ -169,10 +165,31 @@ YUI().use("console", "test",function (Y) {
         }
     });
 
+    Y.jsmidi.test.RealWorldTestCase = new Y.Test.Case({
+
+        name : "Real Examples testcase",
+
+        testReal1: function() {
+
+            var noteEvents = [];
+            ["C4", "E4", "G4"].forEach(function(note) {
+                Array.prototype.push.apply(noteEvents, MidiEvent.createNote(note));
+            });
+
+            var track = new MidiTrack(noteEvents);
+            var song  = MidiWriter({ tracks: [track] });
+
+            console.log(song.b64);
+            song.play();
+            song.save();
+        }
+    });
+
     Y.jsmidi.test.Suite = new Y.Test.Suite("JSMidi Suite");
     Y.jsmidi.test.Suite.add(Y.jsmidi.test.MidiTestCase);
     Y.jsmidi.test.Suite.add(Y.jsmidi.test.EventTestCase);
     Y.jsmidi.test.Suite.add(Y.jsmidi.test.TrackTestCase);
+    Y.jsmidi.test.Suite.add(Y.jsmidi.test.RealWorldTestCase);
 
     var r = new Y.Console({
         newestOnTop : false,
