@@ -39,7 +39,8 @@ Since timings are not specified the defaults will be taken.
     // Play the song
     song.play();
 
-    // Play/save the song (depending of MIDI plugins in the browser)
+    // Play/save the song (depending of MIDI plugins in the browser). It opens
+    // a new window and loads the generated MIDI file with the proper MIME type
     song.save();
 
 

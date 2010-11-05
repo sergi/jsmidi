@@ -167,7 +167,9 @@ var MidiWriter = window.MidiWriter = function(config) {
                 audio.play();
             },
             save: function() {
-                document.location.href = "data:audio/midi;base64," + this.b64;
+                window.open("data:audio/midi;base64," + this.b64,
+                            "JSMidi generated output",
+                            "resizable=yes,scrollbars=no,status=no");
             }
         };
 
