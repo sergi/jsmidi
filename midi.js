@@ -13,6 +13,10 @@ if (!window.console || !console.firebug) {
     }
 }
 
+var DEFAULT_VOLUME   = 90;
+var DEFAULT_DURATION = 128;
+var DEFAULT_CHANNEL  = 0;
+
 // 0x4D 0x54 0x68 0x64 First 4 bytes of a SMF Midi file
 var HDR_CHUNKID     = "MThd";
 var HDR_CHUNK_SIZE  = "\x00\x00\x00\x06"; // Header size for SMF
@@ -190,7 +194,7 @@ var MidiEvent = window.MidiEvent = function(params) {
  * parameter is not specified, it creates the noteOff event, which stops the
  * note after it has been played, instead of keeping it playing.
  *
- * @param note {Note} Note object
+ * @param note {Note || String} Note object or string
  * @param sustained {Boolean} Whether the note has to end or keep playing
  * @returns Array of events, with a maximum of two events (noteOn and noteOff)
  */
@@ -198,21 +202,25 @@ var MidiEvent = window.MidiEvent = function(params) {
 MidiEvent.createNote = function(note, sustained) {
     var events = [];
 
+    if (!note) { throw new Error("Note not specified"); }
+
+    if (typeof note === "string") { note = noteTable[note]; }
+
     events.push(new MidiEvent({
-        time:    this.setTime(time),
+        time:    0,
         type:    EVT_NOTE_ON,
-        channel: note.channel || 0,
-        param1:  note.pitch,
-        param2:  note.volume
+        channel: note.channel || DEFAULT_CHANNEL,
+        param1:  note.pitch   || note,
+        param2:  note.volume  || DEFAULT_VOLUME
     }));
 
     if (!sustained) {
         events.push(new MidiEvent({
-            time:    this.setTime(time),
+            time:    note.time || DEFAULT_DURATION,
             type:    EVT_NOTE_OFF,
-            channel: note.channel || 0,
-            param1:  note.pitch,
-            param2:  note.volume
+            channel: note.channel || DEFAULT_CHANNEL,
+            param1:  note.pitch   || note,
+            param2:  note.volume  || DEFAULT_VOLUME
         }));
     }
 
