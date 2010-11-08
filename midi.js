@@ -205,29 +205,54 @@ MidiEvent.createNote = function(note, sustained) {
     var events = [];
 
     if (!note) { throw new Error("Note not specified"); }
-
     if (typeof note === "string") { note = noteTable[note]; }
 
-    events.push(new MidiEvent({
-        time:    0,
-        type:    EVT_NOTE_ON,
-        channel: note.channel || DEFAULT_CHANNEL,
-        param1:  note.pitch   || note,
-        param2:  note.volume  || DEFAULT_VOLUME
-    }));
+    events.push(MidiEvent.noteOn(note));
 
     if (!sustained) {
-        events.push(new MidiEvent({
-            time:    note.time || DEFAULT_DURATION,
-            type:    EVT_NOTE_OFF,
-            channel: note.channel || DEFAULT_CHANNEL,
-            param1:  note.pitch   || note,
-            param2:  note.volume  || DEFAULT_VOLUME
-        }));
+        events.push(MidiEvent.noteOff(note, note.time || DEFAULT_DURATION));
     }
 
     return events;
 };
+
+/**
+ * Returns an event of the type NOTE_ON taking the values passed and falling
+ * back to defaults if they are not specified.
+ *
+ * @param note {Note || String} Note object or string
+ * @param time {Number} Duration of the note in ticks
+ * @returns MIDI event with type NOTE_ON for the note specified
+ */
+MidiEvent.noteOn = function(note, time) {
+    return new MidiEvent({
+        time:    time || 0,
+        type:    EVT_NOTE_ON,
+        channel: note.channel || DEFAULT_CHANNEL,
+        param1:  note.pitch   || note,
+        param2:  note.volume  || DEFAULT_VOLUME
+    });
+};
+
+/**
+ * Returns an event of the type NOTE_OFF taking the values passed and falling
+ * back to defaults if they are not specified.
+ *
+ * @param note {Note || String} Note object or string
+ * @param time {Number} Duration of the note in ticks
+ * @returns MIDI event with type NOTE_OFF for the note specified
+ */
+
+MidiEvent.noteOff = function(note, time) {
+    return new MidiEvent({
+        time:    time || 0,
+        type:    EVT_NOTE_OFF,
+        channel: note.channel || DEFAULT_CHANNEL,
+        param1:  note.pitch   || note,
+        param2:  note.volume  || DEFAULT_VOLUME
+    });
+};
+
 
 MidiEvent.prototype = {
     type: 0,
