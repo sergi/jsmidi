@@ -30,7 +30,7 @@ Since timings are not specified the defaults will be taken.
     });
 
     // Create a track that contains the events to play the notes above
-    var track = new MidiTrack(noteEvents);
+    var track = new MidiTrack({ events: noteEvents });
 
     // Creates an object that contains the final MIDI track in base64 and some
     // useful methods.

@@ -33,10 +33,25 @@ var EVT_PROGRAM_CHANGE     = 0xC;
 var EVT_CHANNEL_AFTERTOUCH = 0xD;
 var EVT_PITCH_BEND         = 0xE;
 
+var META_SEQUENCE   = 0x00;
+var META_TEXT       = 0x01;
+var META_COPYRIGHT  = 0x02;
+var META_TRACK_NAME = 0x03;
+var META_INSTRUMENT = 0x04;
+var META_LYRIC      = 0x05;
+var META_MARKER     = 0x06;
+var META_CUE_POINT  = 0x07;
+var META_CHANNEL_PREFIX = 0x20;
+var META_END_OF_TRACK   = 0x2f;
+var META_TEMPO      = 0x51;
+var META_SMPTE      = 0x54;
+var META_TIME_SIG   = 0x58;
+var META_KEY_SIG    = 0x59;
+var META_SEQ_EVENT  = 0x7f;
+
 // This is the conversion table from notes to its MIDI number. Provided for
 // convenience, it is not used in this code.
-var noteTable =
-    window.noteTable = { "G9": 0x7F, "Gb9": 0x7E, "F9": 0x7D, "E9": 0x7C, "Eb9": 0x7B,
+var noteTable = { "G9": 0x7F, "Gb9": 0x7E, "F9": 0x7D, "E9": 0x7C, "Eb9": 0x7B,
 "D9": 0x7A, "Db9": 0x79, "C9": 0x78, "B8": 0x77, "Bb8": 0x76, "A8": 0x75, "Ab8": 0x74,
 "G8": 0x73, "Gb8": 0x72, "F8": 0x71, "E8": 0x70, "Eb8": 0x6F, "D8": 0x6E, "Db8": 0x6D,
 "C8": 0x6C, "B7": 0x6B, "Bb7": 0x6A, "A7": 0x69, "Ab7": 0x68, "G7": 0x67, "Gb7": 0x66,
@@ -103,6 +118,11 @@ function str2Bytes(str, finalBytes) {
 
     return bytes;
 }
+
+function isArray(obj) {
+    return !!(obj && obj.concat && obj.unshift && !obj.callee);
+};
+
 
 /**
  * Translates number of ticks to MIDI timestamp format, returning an array of
@@ -306,22 +326,42 @@ MidiEvent.prototype = {
 var MetaEvent = window.MetaEvent = function(params) {
     if (params) {
         this.setType(params.type);
-        this.setChannel(params.channel);
-        this.setParam1(params.param1);
-        this.setParam2(params.param2);
+        this.setData(params.data);
     }
 };
 
+MetaEvent.prototype = {
+    setType: function(t) {
+        this.type = t;
+    },
+    setData: function(d) {
+        this.data = d;
+    },
+    toBytes: function() {
+        if (!this.type || !this.data) {
+            throw new Error("Type or data for meta-event not specified.");
+        }
 
-var MidiTrack = window.MidiTrack = function(events) {
-    this.events = {
-        meta: [],
-        midi: [],
-        sysex: []
-    };
+        var byteArray = [0xff, this.type];
 
-    if (events) {
-        for (var i=0, event; event = events[i]; i++) { this.addEvent(event); }
+        // If data is an array, we assume that it contains several bytes. We
+        // apend them to byteArray.
+        if (isArray(this.data)) {
+            Array.prototype.push.apply(byteArray, this.data);
+        }
+
+        return byteArray;
+    }
+}
+
+var MidiTrack = function(cfg) {
+    this.events = [];
+    for (var p in cfg) {
+        if (cfg.hasOwnProperty(p)) {
+            // Get the setter for the property. The property is capitalized.
+            // Probably a try/catch should go here.
+            this["set" + p.charAt(0).toUpperCase() + p.substring(1)](cfg[p]);
+        }
     }
 };
 
@@ -330,19 +370,59 @@ MidiTrack.TRACK_START = [0x4d, 0x54, 0x72, 0x6b];
 MidiTrack.TRACK_END   = [0x0, 0xFF, 0x2F, 0x0];
 
 MidiTrack.prototype = {
+    /*
+     * Adds an event to the track.
+     *
+     * @param event {MidiEvent} Event to add to the track
+     * @returns the track where the event has been added
+     */
     addEvent: function(event) {
-        var type = "midi";
-
-        if (event instanceof MetaEvent) { type = "meta"; }
-        this.events[type].push(event);
-
+        this.events.push(event);
         return this;
     },
+    setEvents: function(events) {
+        Array.prototype.push.apply(this.events, events);
+        return this;
+    },
+    /*
+     * Adds a text meta-event to the track.
+     *
+     * @param type {Number} type of the text meta-event
+     * @param text {String} Optional. Text of the meta-event.
+     * @returns the track where the event ahs been added
+     */
+    setText: function(type, text) {
+        // If the param text is not specified, it is assumed that a generic
+        // text is wanted and that the type parameter is the actual text to be
+        // used.
+        if (!text) {
+            type = META_TEXT;
+            text = type;
+        }
+        return this.addEvent(new MetaEvent({ type: type, data: text }));
+    },
+    // The following are setters for different kinds of text in MIDI, they all
+    // use the |setText| method as a proxy.
+    setCopyright: function(text) { return this.setText(META_COPYRIGHT, text); },
+    setTrackName: function(text) { return this.setText(META_TRACK_NAME, text); },
+    setInstrument: function(text) { return this.setText(META_INSTRUMENT, text); },
+    setLyric: function(text) { return this.setText(META_LYRIC, text); },
+    setMarker: function(text) { return this.setText(META_MARKER, text); },
+    setCuePoint: function(text) { return this.setText(META_CUE_POINT, text); },
+
+    setTempo: function(tempo) {
+        this.addEvent(new MetaEvent({ type: META_TEMPO, data: tempo }));
+    },
+    setTimeSig: function() {
+        // TBD
+    },
+    setKeySig: function() {
+        // TBD
+    },
+
     toBytes: function() {
         var trackLength = 0;
         var eventBytes = [];
-        var metaEvents = this.events.meta;
-        var midiEvents = this.events.midi;
         var startBytes = MidiTrack.TRACK_START;
         var endBytes   = MidiTrack.TRACK_END;
 
@@ -358,8 +438,7 @@ MidiTrack.prototype = {
             Array.prototype.push.apply(eventBytes, bytes);
         };
 
-        metaEvents.forEach(addEventBytes);
-        midiEvents.forEach(addEventBytes);
+        this.events.forEach(addEventBytes);
 
         // Add the end-of-track bytes to the sum of bytes for the track, since
         // they are counted (unlike the start-of-track ones).
@@ -372,5 +451,8 @@ MidiTrack.prototype = {
         return startBytes.concat(lengthBytes, eventBytes, endBytes);
     }
 };
+
+window.MidiTrack = MidiTrack;
+window.noteTable = noteTable;
 
 })(this);

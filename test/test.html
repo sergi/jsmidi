@@ -72,7 +72,7 @@ YUI().use("console", "test",function (Y) {
             },
         */
         testMidiWriter: function() {
-            var track = new MidiTrack([this.evt1, this.evt2]);
+            var track = new MidiTrack({ events: [this.evt1, this.evt2] });
             var midiHex = MidiWriter({ tracks: [track] });
             //midiHex.save();
             //a.src = uri//"http://www.a1freesoundeffects.com/popular12008/sword.mp3";
@@ -153,14 +153,12 @@ YUI().use("console", "test",function (Y) {
             A.isObject(track);
             A.isInstanceOf(MidiTrack, track);
             A.isObject(track.events);
-            A.areEqual(0, track.events.midi.length);
-            A.areEqual(0, track.events.meta.length);
-            A.areEqual(0, track.events.sysex.length);
+            A.areEqual(0, track.events.length);
             A.areEqual([0x4d, 0x54, 0x72, 0x6b, 0x00, 0x00, 0x00, 0x4, 0x00, 0xff, 0x2f, 0x00].toString()
                         ,track.toBytes().toString());
         },
         testCreateWithEvents: function() {
-            var track = new MidiTrack([this.evt1, this.evt2]);
+            var track = new MidiTrack({events: [this.evt1, this.evt2] });
             //A.areEqual("4d54726b0000000f00903c0a8100803c0a00ff2f00", ArrayToHexString(track.toBytes()));
         }
     });
@@ -176,11 +174,11 @@ YUI().use("console", "test",function (Y) {
                 Array.prototype.push.apply(noteEvents, MidiEvent.createNote(note));
             });
 
-            var track = new MidiTrack(noteEvents);
+            var track = new MidiTrack({ events: noteEvents });
             var song  = MidiWriter({ tracks: [track] });
 
-            console.log(song.b64);
-            song.play();
+            A.areEqual("TVRoZAAAAAYAAAABAIBNVHJrAAAAHwCQPFqBAIA8WgCQQFqBAIBAWgCQQ1qBAIBDWgD/LwA=", song.b64);
+            // song.play();
             song.save();
         }
     });
