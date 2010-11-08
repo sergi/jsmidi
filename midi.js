@@ -107,7 +107,7 @@ function codes2Str(byteArray) {
 
 function str2Bytes(str, finalBytes) {
     if (finalBytes) {
-        while ((str.length / 2) < finalBytes) { str = "0" + str; }
+        while ((str.length / 2) < finalBytes) { str += "0"; }
     }
 
     var bytes = [];
@@ -183,8 +183,9 @@ var MidiWriter = window.MidiWriter = function(config) {
         return {
             b64: btoa(hexMidi),
             play: function() {
-                var audio = new Audio("data:audio/mid;base64," + this.b64);
-                audio.play();
+                // Doesn't really work
+                // var audio = new Audio("data:audio/mid;base64," + this.b64);
+                // audio.play();
             },
             save: function() {
                 window.open("data:audio/midi;base64," + this.b64,
