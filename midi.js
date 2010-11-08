@@ -330,7 +330,6 @@ MidiTrack.TRACK_START = [0x4d, 0x54, 0x72, 0x6b];
 MidiTrack.TRACK_END   = [0x0, 0xFF, 0x2F, 0x0];
 
 MidiTrack.prototype = {
-    closed: false,
     addEvent: function(event) {
         var type = "midi";
 
