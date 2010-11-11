@@ -238,15 +238,27 @@ var MidiEvent = function(params) {
  */
 
 MidiEvent.createNote = function(note, sustained) {
-    var events = [];
-
     if (!note) { throw new Error("Note not specified"); }
-    if (typeof note === "string") { note = noteTable[note]; }
 
+    if (typeof note === "string") {
+        note = noteTable[note];
+    // The pitch is mandatory if the note object is used.
+    } else if (!note.pitch) {
+        throw new Error("The pitch is required in order to create a note.");
+    }
+
+    var events = [];
     events.push(MidiEvent.noteOn(note));
 
+    // If there is a |sustained| parameter, the note will keep playing until
+    // a noteOff event is issued for it.
     if (!sustained) {
-        events.push(MidiEvent.noteOff(note, note.time || DEFAULT_DURATION));
+        // The noteOff event will be the one that is passed the actual duration
+        // value for the note, since it is the one that will stop playing the
+        // note at a particular time. If not specified it takes the default
+        // value for it.
+        // TODO: Is is good to have a default value for it?
+        events.push(MidiEvent.noteOff(note, note.duration || DEFAULT_DURATION));
     }
 
     return events;
@@ -260,9 +272,9 @@ MidiEvent.createNote = function(note, sustained) {
  * @param time {Number} Duration of the note in ticks
  * @returns MIDI event with type NOTE_ON for the note specified
  */
-MidiEvent.noteOn = function(note, time) {
+MidiEvent.noteOn = function(note, duration) {
     return new MidiEvent({
-        time:    time || 0,
+        time:    note.duration || duration || 0,
         type:    EVT_NOTE_ON,
         channel: note.channel || DEFAULT_CHANNEL,
         param1:  note.pitch   || note,
@@ -279,9 +291,9 @@ MidiEvent.noteOn = function(note, time) {
  * @returns MIDI event with type NOTE_OFF for the note specified
  */
 
-MidiEvent.noteOff = function(note, time) {
+MidiEvent.noteOff = function(note, duration) {
     return new MidiEvent({
-        time:    time || 0,
+        time:    note.duration || duration || 0,
         type:    EVT_NOTE_OFF,
         channel: note.channel || DEFAULT_CHANNEL,
         param1:  note.pitch   || note,
