@@ -232,7 +232,16 @@ var MidiEvent = function(params) {
  * parameter is not specified, it creates the noteOff event, which stops the
  * note after it has been played, instead of keeping it playing.
  *
- * @param note {Note || String} Note object or string
+ * This method accepts two ways of expressing notes. The first one is a string,
+ * which will be looked up in the global |noteTable| but it will take the
+ * default values for pitch, channel, durtion and volume.
+ *
+ * If a note object is passed to the method instead, it should contain the properties
+ * channel, pitch, duration and volume, of which pitch is mandatory. In case the
+ * channel, the duration or the volume are not passed, default values will be
+ * used.
+ *
+ * @param note {object || String} Object with note properties or string
  * @param sustained {Boolean} Whether the note has to end or keep playing
  * @returns Array of events, with a maximum of two events (noteOn and noteOff)
  */
@@ -351,7 +360,6 @@ MidiEvent.prototype = {
     }
 };
 
-var MetaEvent = window.MetaEvent = function(params) {
 var MetaEvent = function(params) {
     if (params) {
         this.setType(params.type);
