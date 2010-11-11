@@ -202,15 +202,27 @@ var MidiWriter = function(config) {
     }
 };
 
-var MidiEvent = window.MidiEvent = function(params) {
-    this.timeStamp  = []; // Time stamp byte
-
-    if (params) {
-        this.setTime(params.time || 0);
+/*
+ * Generic MidiEvent object. This object is used to create standard MIDI events
+ * (note Meta events nor SysEx events). It is passed a |params| object that may
+ * contain the keys time, type, channel, param1 and param2. Note that only the
+ * type, channel and param1 are strictly required. If the time is not provided,
+ * a time of 0 will be assumed.
+ *
+ * @param {object} params Object containing the properties of the event.
+ */
+var MidiEvent = function(params) {
+    if (params &&
+        (params.type    !== null || params.type    !== undefined) &&
+        (params.channel !== null || params.channel !== undefined) &&
+        (params.param1  !== null || params.param1  !== undefined)) {
+        this.setTime(params.time);
         this.setType(params.type);
         this.setChannel(params.channel);
         this.setParam1(params.param1);
         this.setParam2(params.param2);
+    } else {
+        throw new Error("Not enough parameters to create an event.");
     }
 };
 
@@ -287,7 +299,7 @@ MidiEvent.prototype = {
         // interpreters know that the time measure specification ends and the
         // rest of the event signature starts.
 
-        this.time = translateTickTime(ticks);
+        this.time = translateTickTime(ticks || 0);
     },
     setType: function(type) {
         if (type < EVT_NOTE_OFF || type > EVT_PITCH_BEND) {
