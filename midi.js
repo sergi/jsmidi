@@ -107,7 +107,7 @@ function codes2Str(byteArray) {
 
 function str2Bytes(str, finalBytes) {
     if (finalBytes) {
-        while ((str.length / 2) < finalBytes) { str += "0"; }
+        while ((str.length / 2) < finalBytes) { str = "0" + str; }
     }
 
     var bytes = [];
