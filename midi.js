@@ -163,7 +163,7 @@ var translateTickTime = function(ticks) {
  * @returns An object with the hex and base64 resulting streams, as well as
  * with some useful methods.
  */
-var MidiWriter = window.MidiWriter = function(config) {
+var MidiWriter = function(config) {
     if (config) {
         var tracks  = config.tracks || [];
         // Number of tracks in hexadecimal
@@ -325,6 +325,7 @@ MidiEvent.prototype = {
 };
 
 var MetaEvent = window.MetaEvent = function(params) {
+var MetaEvent = function(params) {
     if (params) {
         this.setType(params.type);
         this.setData(params.data);
@@ -453,6 +454,9 @@ MidiTrack.prototype = {
     }
 };
 
+window.MidiWriter = MidiWriter;
+window.MidiEvent = MidiEvent;
+window.MetaEvent = MetaEvent;
 window.MidiTrack = MidiTrack;
 window.noteTable = noteTable;
 
