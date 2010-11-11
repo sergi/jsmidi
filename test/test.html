@@ -83,13 +83,22 @@ YUI().use("console", "test",function (Y) {
 
         name : "Midi events testcase",
 
+        _should: {
+            error: {
+                testCreateEmpty: "Not enough parameters to create an event."
+            }
+        },
+
+
         testCreateEmpty : function () {
             var event = new MidiEvent();
 
+            /*
             A.isObject(event);
             A.isInstanceOf(MidiEvent, event);
             A.isArray(event.timeStamp);
             A.areEqual(0, event.timeStamp.length);
+            */
         },
 
         testCreateWithParams : function () {
@@ -173,7 +182,6 @@ YUI().use("console", "test",function (Y) {
             ["C4", "E4", "G4"].forEach(function(note) {
                 Array.prototype.push.apply(noteEvents, MidiEvent.createNote(note));
             });
-
             var track = new MidiTrack({ events: noteEvents });
             var song  = MidiWriter({ tracks: [track] });
 
