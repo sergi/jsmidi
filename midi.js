@@ -183,9 +183,12 @@ var MidiWriter = function(config) {
         return {
             b64: btoa(hexMidi),
             play: function() {
-                // Doesn't really work
-                // var audio = new Audio("data:audio/mid;base64," + this.b64);
-                // audio.play();
+                if (document) {
+                    var embed = document.createElement("embed");
+                    embed.setAttribute("src", "data:audio/midi;base64," + this.b64);
+                    embed.setAttribute("type", "audio/midi");
+                    document.body.appendChild(embed);
+                }
             },
             save: function() {
                 window.open("data:audio/midi;base64," + this.b64,
