@@ -19,7 +19,10 @@ var DEFAULT_VOLUME   = 90;
 var DEFAULT_DURATION = 128;
 var DEFAULT_CHANNEL  = 0;
 
-// 0x4D 0x54 0x68 0x64 First 4 bytes of a SMF Midi file
+// These are the different values that compose a MID header. They are already
+// expressed in their string form, so no useless conversion has to take place
+// since they are constants.
+
 var HDR_CHUNKID     = "MThd";
 var HDR_CHUNK_SIZE  = "\x00\x00\x00\x06"; // Header size for SMF
 var HDR_TYPE0       = "\x00\x00"; // Midi Type 0 id
@@ -123,7 +126,7 @@ function str2Bytes(str, finalBytes) {
 
 function isArray(obj) {
     return !!(obj && obj.concat && obj.unshift && !obj.callee);
-};
+}
 
 
 /**
@@ -391,7 +394,7 @@ MetaEvent.prototype = {
 
         return byteArray;
     }
-}
+};
 
 var MidiTrack = function(cfg) {
     this.events = [];
@@ -442,12 +445,12 @@ MidiTrack.prototype = {
     },
     // The following are setters for different kinds of text in MIDI, they all
     // use the |setText| method as a proxy.
-    setCopyright: function(text) { return this.setText(META_COPYRIGHT, text); },
-    setTrackName: function(text) { return this.setText(META_TRACK_NAME, text); },
+    setCopyright:  function(text) { return this.setText(META_COPYRIGHT, text);  },
+    setTrackName:  function(text) { return this.setText(META_TRACK_NAME, text); },
     setInstrument: function(text) { return this.setText(META_INSTRUMENT, text); },
-    setLyric: function(text) { return this.setText(META_LYRIC, text); },
-    setMarker: function(text) { return this.setText(META_MARKER, text); },
-    setCuePoint: function(text) { return this.setText(META_CUE_POINT, text); },
+    setLyric:      function(text) { return this.setText(META_LYRIC, text);      },
+    setMarker:     function(text) { return this.setText(META_MARKER, text);     },
+    setCuePoint:   function(text) { return this.setText(META_CUE_POINT, text);  },
 
     setTempo: function(tempo) {
         this.addEvent(new MetaEvent({ type: META_TEMPO, data: tempo }));
