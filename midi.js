@@ -2,6 +2,8 @@
 
 (function (window) {
 
+var AP = Array.prototype;
+
 // Create a mock console object to void undefined errors if the console object
 // is not defined.
 if (!window.console || !console.firebug) {
@@ -79,7 +81,7 @@ var noteTable = { "G9": 0x7F, "Gb9": 0x7E, "F9": 0x7D, "E9": 0x7C, "Eb9": 0x7B,
  * @returns array with the charcode values of the string
  */
 function StringToNumArray(str) {
-    return Array.prototype.map.call(str, function(char) {
+    return AP.map.call(str, function(char) {
         return char.charCodeAt(0);
     });
 }
@@ -384,7 +386,7 @@ MetaEvent.prototype = {
         // If data is an array, we assume that it contains several bytes. We
         // apend them to byteArray.
         if (isArray(this.data)) {
-            Array.prototype.push.apply(byteArray, this.data);
+            AP.push.apply(byteArray, this.data);
         }
 
         return byteArray;
@@ -418,7 +420,7 @@ MidiTrack.prototype = {
         return this;
     },
     setEvents: function(events) {
-        Array.prototype.push.apply(this.events, events);
+        AP.push.apply(this.events, events);
         return this;
     },
     /*
@@ -472,7 +474,7 @@ MidiTrack.prototype = {
         var addEventBytes = function(event) {
             var bytes = event.toBytes();
             trackLength += bytes.length;
-            Array.prototype.push.apply(eventBytes, bytes);
+            AP.push.apply(eventBytes, bytes);
         };
 
         this.events.forEach(addEventBytes);
